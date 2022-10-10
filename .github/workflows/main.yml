@@ -17,7 +17,7 @@ jobs:
         - name: clone-template
           id: clone-template
           run: |
-            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" > bunnyresult
+            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" -o json > bunnyresult
             new_id=$( cat bunnyresult | jq -r '.id' )
             env_unique=$( cat bunnyresult | jq -r '.namespace' )
             echo "::set-output name=new_id::$new_id"
@@ -71,7 +71,7 @@ jobs:
             sleep 10
         - name: deploy-environment
           run: |
-            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} |  jq '.id' )
+            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id' )
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
   run-tests:
     runs-on: ubuntu-latest
@@ -95,5 +95,5 @@ jobs:
     steps:
         - name: delete-ephemeral
           run: |
-            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} |  jq '.id'
+            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id'
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
