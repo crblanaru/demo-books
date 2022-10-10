@@ -17,4 +17,4 @@ jobs:
         - name: clone-template
           id: clone-template
           run: |
-            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" -o json
+            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}"
