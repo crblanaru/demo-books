@@ -9,7 +9,7 @@ jobs:
   initialize-environment:
     runs-on: ubuntu-latest
     container:
-        image: bunnyshell/cli:v0.6.0
+        image: bunnyshell/cli:v0.6.1
     steps:
         # need one more step here where I alter the image name for the helm chart by setting an environment variable
         # using sleep to give me time to perform this step manually
