@@ -17,9 +17,4 @@ jobs:
         - name: clone-template
           id: clone-template
           run: |
-            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" 2>&1 > bunnyresult
-            cat bunnyresult
-            new_id=$( cat bunnyresult | sed -nr 's/EnvironmentID.*\| (.*)/\1/p' )
-            env_unique=$( cat bunnyresult | sed -nr 's/Namespace.*\| (.*)/\1/p' )
-            echo "::set-output name=new_id::$new_id"
-            echo "::set-output name=env_unique::$env_unique"
+            bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" 
