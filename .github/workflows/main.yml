@@ -55,7 +55,7 @@ jobs:
         with:
           context: frontend/
           target: prod
-          build-args: REACT_APP_BASE_API=backend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com
+          build-args: REACT_APP_BASE_API="backend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com"
           push: true
           tags: crblanaru/frontend:latest,crblanaru/frontend:v0.0.${{ github.run_number }}
   initialize-environment:
