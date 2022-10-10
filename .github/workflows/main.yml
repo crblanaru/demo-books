@@ -12,7 +12,7 @@ jobs:
       new_id: ${{ steps.clone-template.outputs.new_id }}
       env_unique: ${{ steps.clone-template.outputs.env_unique }}
     container:
-        image: bunnyshell/cli
+        image: bunnyshell/cli:v0.6.0
     steps:
         - name: clone-template
           env: 
