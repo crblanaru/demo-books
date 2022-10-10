@@ -18,8 +18,8 @@ jobs:
           id: clone-template
           run: |
             bunnyshell-cli environments clone --id p2xKjb7EYM --token ${{ secrets.BUNNYSHELL_TOKEN }} --name "demobooks-${{ github.run_number }}" -o json 2>&1 > bunnyresult
-            new_id=$( cat bunnyresult | jq '.id' )
-            env_unique=$( cat bunnyresult | jq '.namespace' )
+            new_id=$( cat bunnyresult | jq --raw '.id' )
+            env_unique=$( cat bunnyresult | jq --raw '.namespace' )
             echo "::set-output name=new_id::$new_id"
             echo "::set-output name=env_unique::$env_unique"
   create-image:
