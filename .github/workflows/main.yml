@@ -73,7 +73,7 @@ jobs:
         - name: deploy-environment
           run: |
             event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id' )
-            bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
+            bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json
   run-tests:
     runs-on: ubuntu-latest
     needs: [create-environment, initialize-environment]
@@ -97,4 +97,4 @@ jobs:
         - name: delete-ephemeral
           run: |
             event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id'
-            bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
+            bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json
