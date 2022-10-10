@@ -71,7 +71,8 @@ jobs:
             sleep 10
         - name: deploy-environment
           run: |
-            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id' )
+            bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json
+            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq -r '.id' )
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
   run-tests:
     runs-on: ubuntu-latest
