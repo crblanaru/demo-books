@@ -13,10 +13,10 @@ jobs:
       env_unique: ${{ steps.clone-template.outputs.env_unique }}
     container:
         image: bunnyshell/cli:v0.6.0
+    env: 
+      BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
     steps:
         - name: clone-template
-          env: 
-            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           id: clone-template
           run: |
             bunnyshell-cli version
