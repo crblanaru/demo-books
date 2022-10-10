@@ -22,6 +22,7 @@ jobs:
             env_unique=$( cat bunnyresult | jq '.namespace' )
             echo "::set-output name=new_id::$new_id"
             echo "::set-output name=env_unique::$env_unique"
+            echo "$new_id : $env_unique"
   create-image:
     runs-on: ubuntu-latest
     needs: [create-environment]
@@ -71,7 +72,7 @@ jobs:
             sleep 10
         - name: deploy-environment
           run: |
-            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json 2>&1 |  jq '.id' )
+            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id' )
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
   run-tests:
     runs-on: ubuntu-latest
@@ -95,5 +96,5 @@ jobs:
     steps:
         - name: delete-ephemeral
           run: |
-            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json 2>&1 |  jq '.id'
+            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id'
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }}
