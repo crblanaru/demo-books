@@ -95,5 +95,6 @@ jobs:
     steps:
         - name: delete-ephemeral
           run: |
-            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id'
+            sleep 60
+            event_id=$( bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq '.id' )
             bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json
