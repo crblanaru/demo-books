@@ -68,7 +68,8 @@ jobs:
         # using sleep to give me time to perform this step manually
         - name: set-env-variable
           run: |
-            sleep 10
+            var_id=$( bunnyshell-cli variables list --environment ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} | jq -r '._embedded.item[0].id' )
+            bunnyshell-cli variables edit --id $var_id --token ${{ secrets.BUNNYSHELL_TOKEN }} --value "v0.0.${{ github.run_number }}"
         - name: deploy-environment
           run: |
             event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json |  jq -r '.id' )
