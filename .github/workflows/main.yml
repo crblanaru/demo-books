@@ -1,0 +1,111 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'dev'
+
+jobs:
+  create-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      new_id: ${{ steps.clone-template.outputs.new_id }}
+      env_unique: ${{ steps.clone-template.outputs.env_unique }}
+    container:
+        image: bunnyshell/cli:v0.6.2
+    steps:
+        - name: clone-template
+          id: clone-template
+          env:
+            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
+          run: |
+            bunnyshell-cli environments clone --id ${{secrets.PRIMARY_BNS_ENV_ID}} --name "demobooks-${{ github.run_number }}" > bunnyresult
+            new_id=$( cat bunnyresult | jq -r '.id' )
+            env_unique=$( cat bunnyresult | jq -r '.namespace' )
+            echo "::set-output name=new_id::$new_id"
+            echo "::set-output name=env_unique::$env_unique"
+  build-images:
+    runs-on: ubuntu-latest
+    needs: [create-environment]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: backend/
+          target: prod
+          push: true
+          tags: crblanaru/backend:latest,crblanaru/backend:v0.0.${{ github.run_number }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: frontend/
+          target: prod
+          build-args: REACT_APP_BASE_API="https://backend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com"
+          push: true
+          tags: crblanaru/frontend:latest,crblanaru/frontend:v0.0.${{ github.run_number }}
+  initialize-environment:
+    runs-on: ubuntu-latest
+    needs: [build-images, create-environment]
+    container:
+        image: bunnyshell/cli:v0.6.2
+    steps:
+        - name: set-env-variable
+          env:
+            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
+          run: |
+            var_id=$( bunnyshell-cli variables list --environment ${{needs.create-environment.outputs.new_id}} | jq -r '._embedded.item[0].id' )
+            bunnyshell-cli variables edit --id $var_id --value "v0.0.${{ github.run_number }}" 
+        - name: deploy-environment
+          env:
+            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
+          run: |
+            event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} |  jq -r '.id' )
+            bunnyshell-cli events show --id $event_id --monitor 
+  run-tests:
+    runs-on: ubuntu-latest
+    needs: [create-environment, initialize-environment]
+    container:
+        image: bunnyshell/cli:v0.6.2
+    steps:
+        - name: simple-tests
+          run: |
+            sleep 10
+            status_code=$(curl --write-out %{http_code} --silent --output /dev/null "https://backend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com")
+            if [[ "$status_code" -ne 200 ]] ; then
+              echo "Site status changed to $status_code" | exit 1
+            else
+              exit 0
+            fi
+  clean-up:
+    runs-on: ubuntu-latest
+    needs: [create-environment, run-tests]
+    container:
+        image: bunnyshell/cli:v0.6.2
+    steps:
+        - name: delete-ephemeral
+          env:
+            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
+          run: |
+            sleep 30
+            bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} 
