@@ -107,5 +107,5 @@ jobs:
             BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
             BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
-            sleep 30
+            sleep 60
             bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} 
