@@ -20,7 +20,7 @@ jobs:
             BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
             BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
-            bunnyshell-cli environments clone --id p2xKjb7EYM --name "demobooks-${{ github.run_number }}" > bunnyresult
+            bunnyshell-cli environments clone --id ${{secrets.PRIMARY_BNS_ENV_ID}} --name "demobooks-${{ github.run_number }}" > bunnyresult
             new_id=$( cat bunnyresult | jq -r '.id' )
             env_unique=$( cat bunnyresult | jq -r '.namespace' )
             echo "::set-output name=new_id::$new_id"
