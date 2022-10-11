@@ -73,14 +73,14 @@ jobs:
             BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             var_id=$( bunnyshell-cli variables list --environment ${{needs.create-environment.outputs.new_id}} | jq -r '._embedded.item[0].id' )
-            bunnyshell-cli variables edit --id $var_id --token ${{ secrets.BUNNYSHELL_TOKEN }} --value "v0.0.${{ github.run_number }}" -o json
+            bunnyshell-cli variables edit --id $var_id --value "v0.0.${{ github.run_number }}" 
         - name: deploy-environment
           env:
             BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
             BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} |  jq -r '.id' )
-            bunnyshell-cli events show --id $event_id --monitor --token ${{ secrets.BUNNYSHELL_TOKEN }} -o json
+            bunnyshell-cli events show --id $event_id --monitor 
   run-tests:
     runs-on: ubuntu-latest
     needs: [create-environment, initialize-environment]
