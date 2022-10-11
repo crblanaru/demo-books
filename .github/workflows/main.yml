@@ -13,12 +13,12 @@ jobs:
       env_unique: ${{ steps.clone-template.outputs.env_unique }}
     container:
         image: bunnyshell/cli:v0.6.2
+    env:
+        BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+        BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
     steps:
         - name: clone-template
           id: clone-template
-          env:
-            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
-            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             bunnyshell-cli environments clone --id ${{secrets.PRIMARY_BNS_ENV_ID}} --name "demobooks-${{ github.run_number }}" > bunnyresult
             new_id=$( cat bunnyresult | jq -r '.id' )
@@ -66,18 +66,15 @@ jobs:
     needs: [build-images, create-environment]
     container:
         image: bunnyshell/cli:v0.6.2
+    env:
+        BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+        BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
     steps:
         - name: set-env-variable
-          env:
-            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
-            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             var_id=$( bunnyshell-cli variables list --environment ${{needs.create-environment.outputs.new_id}} | jq -r '._embedded.item[0].id' )
             bunnyshell-cli variables edit --id $var_id --value "v0.0.${{ github.run_number }}" 
         - name: deploy-environment
-          env:
-            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
-            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             event_id=$( bunnyshell-cli environments deploy --id ${{needs.create-environment.outputs.new_id}} |  jq -r '.id' )
             bunnyshell-cli events show --id $event_id --monitor 
@@ -101,11 +98,11 @@ jobs:
     needs: [create-environment, run-tests]
     container:
         image: bunnyshell/cli:v0.6.2
+    env:
+        BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
+        BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
     steps:
         - name: delete-ephemeral
-          env:
-            BUNNYSHELL_CONFIG_FILE: /root/.bunnyshell/config.yaml
-            BUNNYSHELL_TOKEN: ${{ secrets.BUNNYSHELL_TOKEN }}
           run: |
             sleep 60
             bunnyshell-cli environments delete --id ${{needs.create-environment.outputs.new_id}} 
