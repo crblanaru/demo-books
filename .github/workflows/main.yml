@@ -86,6 +86,7 @@ jobs:
     steps:
         - name: simple-tests
           run: |
+            echo "https://frontend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com"
             sleep 10
             status_code=$(curl --write-out %{http_code} --silent --output /dev/null "https://backend-${{needs.create-environment.outputs.env_unique}}.bunnyenv.com")
             if [[ "$status_code" -ne 200 ]] ; then
